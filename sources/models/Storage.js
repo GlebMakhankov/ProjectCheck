@@ -3,6 +3,12 @@ class StorageConstructor {
     this.contacts = new webix.DataCollection({
       url: "http://localhost:8096/api/v1/contacts/",
       save: "rest->http://localhost:8096/api/v1/contacts/",
+      scheme: {
+        $init: function (item) {
+          item.ContactID = item.id;
+          item.value = `${item.FirstName} ${item.LastName}`;
+        },
+      },
     });
     this.activities = new webix.DataCollection({
       url: "http://localhost:8096/api/v1/activities/",
@@ -13,7 +19,8 @@ class StorageConstructor {
       save: "rest->http://localhost:8096/api/v1/activitytypes/",
       scheme: {
         $init: function (item) {
-			item.TypeID = item.id;
+          item.TypeID = item.id;
+          item.value = item.Value;
         },
       },
     });

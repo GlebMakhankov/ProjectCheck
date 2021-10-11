@@ -16,7 +16,7 @@ const Contacts_Template_Toolbar = {
       align: "right",
       type: "icon",
       icon: "mdi mdi-delete",
-      click: () => console.log("click"),
+      click: () => webix.message("Click!"),
     },
     {
       view: "button",
@@ -25,7 +25,7 @@ const Contacts_Template_Toolbar = {
       align: "right",
       type: "icon",
       icon: "mdi mdi-square-edit-outline",
-      click: () => console.log("click"),
+      click: () => webix.message("Click!"),
     },
   ],
 };

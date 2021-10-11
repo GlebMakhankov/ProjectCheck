@@ -1,5 +1,6 @@
 import { JetView } from "webix-jet";
 import { Storage } from "../../models/Storage";
+import Activities_Window from "./Activities_Window";
 import Activities_Header from "./Activities_Toolbar";
 
 export default class ActivitiesView extends JetView {
@@ -10,7 +11,6 @@ export default class ActivitiesView extends JetView {
       localId: "activitiesDatatable",
       hover: "movieTableRowHover",
       select: "row",
-
       columns: [
         {
           id: "State",
@@ -26,19 +26,15 @@ export default class ActivitiesView extends JetView {
           id: "TypeID",
           header: ["Activity type", { content: "selectFilter" }],
           options: Storage.activityTypes,
-          fillspace: true,
           sort: "text",
-          //  template: function (obj, common, val, config) {
-          //    const item = config.collection.getItem(obj.TypeID);
-          //    return item.Value;
-          //  },
-         //  template: "#TypeID#",
+          width: 120,
         },
         {
           id: "DueDate",
-          header: ["DueDate", { content: "textFilter" }],
-          fillspace: true,
+          header: ["DueDate", { content: "datepickerFilter", inputConfig:{format: "%d %F %Y"} }],
+          width: 200,
           sort: "text",
+			 format:webix.Date.dateToStr("%d %F %Y"),
         },
         {
           id: "Details",
@@ -49,38 +45,37 @@ export default class ActivitiesView extends JetView {
         {
           id: "ContactID",
           header: ["Contact", { content: "selectFilter" }],
-          collection: Storage.contacts,
-          width: 120,
+          options: Storage.contacts,
+          width: 150,
           sort: "text",
-          fillspace: true,
-          template: function (obj, common, val, config) {
-            const item = config.collection.getItem(obj.ContactID);
-            return `${item.FirstName} ${item.LastName}`;
-          },
         },
         {
           header: "",
-          template: "<span class='webix_icon wxi-pencil editActivity'></span>",
+          template:
+            "<span class='mdi mdi-square-edit-outline editActivity'></span>",
           width: 50,
           sort: "text",
         },
         {
           header: "",
-          template: "<span class='webix_icon wxi-trash deleteActivity'></span>",
+          template: "<span class='mdi mdi-delete deleteActivity'></span>",
           width: 50,
           sort: "text",
         },
       ],
       onClick: {
+        editActivity: (e, id) => {
+          const entry = this.$$("activitiesDatatable").getItem(id);
+          this.window.setDataToForm(entry);
+        },
         deleteActivity: (e, id) => {
-          console.log(id);
           webix
             .confirm({
               title: "Delete activity?",
-              text: "Are you sure about that?",
+              text: "Are you sure about that? This is cannot be undone!",
             })
             .then(() => {
-              Storage.activity.remove(id);
+              Storage.activities.remove(id);
             });
         },
       },
@@ -95,30 +90,6 @@ export default class ActivitiesView extends JetView {
 
   init() {
     this.$$("activitiesDatatable").sync(Storage.activities);
-    Storage.contacts.waitData.then(() => {
-      // console.log(Storage.activities.data);
-    });
-
-    //  fetch("http://localhost:8096/api/v1/activitytypes/")
-    //    .then((response) => {
-    //      return response.json();
-    //    })
-    //    .then((data) => {
-    //      console.log(data);
-    //    });
-    //  fetch("http://localhost:8096/api/v1/activities/")
-    //    .then((response) => {
-    //      return response.json();
-    //    })
-    //    .then((data) => {
-    //      console.log(data);
-    //    });
-    //  fetch("http://localhost:8096/api/v1/contacts/")
-    //    .then((response) => {
-    //      return response.json();
-    //    })
-    //    .then((data) => {
-    //      console.log(data);
-    //    });
+    this.window = this.ui(Activities_Window);
   }
 }

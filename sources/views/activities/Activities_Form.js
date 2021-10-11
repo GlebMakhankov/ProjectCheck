@@ -6,35 +6,45 @@ export default class Activities_Form extends JetView {
     return {
       view: "form",
       localId: "Activities_Form",
+      rules: {
+        TypeID: webix.rules.isNotEmpty,
+        ContactID: webix.rules.isNotEmpty,
+      },
       elements: [
-        { view: "textarea", id:"Details", label: "Details", width: 650, height: 100 },
+        {
+          view: "textarea",
+          id: "DetailsTextarea",
+          name: "Details",
+          label: "Details",
+          width: 650,
+          height: 100,
+        },
         {
           view: "richselect",
           id: "richSelectActivitiesTypes",
-          name: "id",
+          name: "TypeID",
           label: "Type",
           options: Storage.activityTypes,
         },
         {
           view: "richselect",
           id: "richSelectContacts",
-          name: "id",
-          body: {
-            template: "#id#",
-          },
+          name: "ContactID",
           label: "Contact",
-          options: Storage.activityTypes,
+          options: Storage.contacts,
         },
         {
           cols: [
             {
               view: "datepicker",
               label: "Date",
+              name: "Date",
               width: 300,
             },
             {
               view: "datepicker",
               label: "Time",
+              name: "Time",
               type: "time",
               width: 300,
             },
@@ -42,8 +52,12 @@ export default class Activities_Form extends JetView {
         },
         {
           view: "checkbox",
+          id: "stateCheckbox",
+          name: "State",
           labelRight: "Completed",
           labelWidth: 0,
+          checkValue: "Open",
+          uncheckValue: "Close",
         },
         {
           cols: [
@@ -51,6 +65,7 @@ export default class Activities_Form extends JetView {
             {
               view: "button",
               value: "Save",
+              localId: "saveBtn",
               width: 130,
               align: "center",
               css: "webix_primary",
@@ -69,13 +84,51 @@ export default class Activities_Form extends JetView {
     };
   }
 
+  setDataToForm(data) {
+    this.$$("saveBtn").setValue("Save");
+    if (data.DueDate) {
+      const dateAndTime = this.strToDate(data.DueDate);
+      data.Date = dateAndTime;
+      data.Time = dateAndTime;
+    }
+    this.$$("Activities_Form").setValues(data);
+  }
+
   saveEntry() {
     const form = this.$$("Activities_Form");
+    if (!form.validate()) return;
     const entry = form.getValues();
+    entry.DueDate = this.dateToStr(entry);
     console.log(entry);
+    Storage.activities.exists(entry.id)
+      ? Storage.activities.updateItem(entry.id, entry)
+      : Storage.activities.add(entry);
+    this.hideWindow();
   }
 
   hideWindow() {
     this.getParentView().hideWindow();
+    this.clearAll();
+    this.$$("saveBtn").setValue("Add");
+  }
+
+  clearAll() {
+    const form = this.$$("Activities_Form");
+    form.clear();
+    form.clearValidation();
+  }
+
+  dateToStr(entry) {
+    const formatDate = webix.Date.dateToStr("%Y-%m-%d");
+    const formatTime = webix.Date.dateToStr("%H:%i");
+    const stringDate = formatDate(entry.Date ?? "new Date()");
+    const stringTime = entry.Time ? formatTime(entry.Time) : "00:00";
+    return entry.Date || entry.Time ? `${stringDate} ${stringTime}` : "";
+  }
+
+  strToDate(str) {
+    const parser = webix.Date.strToDate("%Y.%m.%d %H:%i");
+    const date = parser(str);
+    return date;
   }
 }

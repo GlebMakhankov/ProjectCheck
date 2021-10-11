@@ -120,3 +120,11 @@
 	margin: 15px;
 	font-size: 25px;
 }
+.mdi.mdi-delete,
+.mdi.mdi-square-edit-outline {
+	cursor: pointer;
+}
+.mdi.mdi-delete:hover,
+.mdi.mdi-square-edit-outline:hover {
+	color: rgb(28, 161, 193);
+}
